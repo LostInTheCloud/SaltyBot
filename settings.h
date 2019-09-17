@@ -1,2 +1,2 @@
-#define NICK "TheBwuah"
-#define TOKEN "your-token"
+#define NICK "Thebwuah"
+#define TOKEN "your oauth"
