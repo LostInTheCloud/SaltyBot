@@ -16,12 +16,24 @@
 #define LOG(expr) fprintf(LOGFILE, "%s\n", ((expr)));
 #define LOGINT(expr) fprintf(LOGFILE, "%ld\n", ((expr)));
 
+int fetch_amount(char* msg);
+int fetch_balance(char* msg);
 void start_logger();
 void setup();
 void handle_everything(twirc_state_t *s, twirc_event_t *evt);
 void handle_welcome(twirc_state_t *s, twirc_event_t *evt);
 void handle_join(twirc_state_t *s, twirc_event_t *evt);
 void handle_message(twirc_state_t *s, twirc_event_t *evt);
+
+typedef enum phase {BETTING, GAME} PHASE;
+
+typedef struct state
+{
+    PHASE phase;
+    int balance;
+    int blue;
+    int red;
+}STATE;
 
 FILE* LOGFILE;
 int err;

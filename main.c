@@ -18,6 +18,22 @@ int main()
     return 0;
 }
 
+int fetch_amount(char* msg)
+{
+    int amount;
+    err = sscanf(msg, "%*[^0123456789]%d%*[^0123456789]", &amount);
+    ASSERT(err == 1);
+    return amount;
+}
+
+int fetch_balance(char* msg)
+{
+    int amount;
+    err = sscanf(msg,"%*[^.]%*[^0123456789]%d", &amount);
+    ASSERT(err == 1);
+    return amount;
+}
+
 void start_logger()
 {
     char* logpath;
@@ -92,6 +108,8 @@ void handle_join(twirc_state_t *_, twirc_event_t *evt)
 
 void handle_message(twirc_state_t *_, twirc_event_t *evt)
 {
+    int local_amount;
+
     if(strcmp(evt->origin, "xxsaltbotxx")!=0)
         return;
     fprintf(LOGFILE, "%s:  %s\n", evt->origin, evt->message);
@@ -117,6 +135,7 @@ void handle_message(twirc_state_t *_, twirc_event_t *evt)
             // todo: ...
             return;
         }
+        fprintf(LOGFILE,"MSG: %s\n", evt->message);
     }
     else
     {
@@ -127,12 +146,14 @@ void handle_message(twirc_state_t *_, twirc_event_t *evt)
             // betting time
             if(strstr(evt->message, "BLUE"))
             {
-                //todo: ...
+                local_amount = fetch_amount(evt->message);
+                // todo
                 return;
             }
             if(strstr(evt->message, "RED"))
             {
-                //todo: ...
+                local_amount = fetch_amount(evt->message);
+                // todo
                 return;
             }
             ERROR("what the fuck?");
