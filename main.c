@@ -145,6 +145,7 @@ void handle_message(twirc_state_t *_, twirc_event_t *evt)
         {
             // todo: ...
             int new_balance = fetch_balance(evt->message);
+            new_balance += (int)(state.balance/10);
 
             pthread_mutex_lock(&state.mut);
             if(new_balance==state.balance)
@@ -154,7 +155,7 @@ void handle_message(twirc_state_t *_, twirc_event_t *evt)
             else
             {
                 fprintf(LOGFILE, "Bet %s! %d shrooms\n",
-                        (new_balance+state.balance/10)>state.balance?"WON":"LOST",
+                        new_balance>state.balance?"WON":"LOST",
                         new_balance-state.balance);
             }
             state.balance = new_balance;
