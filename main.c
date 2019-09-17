@@ -52,11 +52,12 @@ void start_logger()
 
 void setup()
 {
-    state.balance = 0;
+    state.balance = BALANCE; // todo: proper solution needed
     state.phase = GAME;
     state.blue = 0;
     state.red = 0;
-    state.mutex = PTHREAD_MUTEX_INITIALIZER;
+    err = pthread_mutex_init(&state.mut, NULL);
+    ASSERT(err == 0);
 
     s = twirc_init();
 
@@ -103,7 +104,7 @@ void handle_welcome(twirc_state_t *_, twirc_event_t *evt)
 {
     err = twirc_cmd_join(s, "#saltyteemo");
     LOG("joining saltyteemo");
-    LOGINT(err);
+    //todo: find out what ints shall be returned and check
 }
 
 void handle_join(twirc_state_t *_, twirc_event_t *evt)
@@ -118,7 +119,7 @@ void handle_message(twirc_state_t *_, twirc_event_t *evt)
 
     if(strcmp(evt->origin, "xxsaltbotxx")!=0)
         return;
-    //fprintf(LOGFILE, "%s:  %s\n", evt->origin, evt->message);
+
     if(strstr(evt->message, NICK))
     {
         // targeted at @me
@@ -129,19 +130,42 @@ void handle_message(twirc_state_t *_, twirc_event_t *evt)
             // todo: ...
             return;
         }
-        if(strstr(evt->message, "BETTING HAS CLOSED?!?"))
+        if(strstr(evt->message, "Betting has ended for this round"))
         {
-            ERROR("hfjdsf");
+            ERROR("Betting has ended for this round");
+            // todo: ...
+            return;
+        }
+        if(strstr(evt->message, "You do not have enough"))
+        {
+            ERROR("You do not have enough");
             // todo: ...
             return;
         }
         if(strstr(evt->message, "balance is"))
         {
-            LOG("Placed bet successfully!");
             // todo: ...
+            int new_balance = fetch_balance(evt->message);
+
+            pthread_mutex_lock(&state.mut);
+            if(new_balance==state.balance)
+            {
+                LOG("match remade - refunded");
+            }
+            else
+            {
+                fprintf(LOGFILE, "Bet %s! %d shrooms\n",
+                        new_balance>state.balance?"WON":"LOST",
+                        new_balance-state.balance);
+            }
+            state.balance = new_balance;
+            pthread_mutex_unlock(&state.mut);
+
+            LOG("Placed bet successfully!");
             return;
         }
-        fprintf(LOGFILE,"MSG: %s\n", evt->message);
+        if(DEBUG)
+            fprintf(LOGFILE,"MSG: %s\n", evt->message);
     }
     else
     {
@@ -151,32 +175,37 @@ void handle_message(twirc_state_t *_, twirc_event_t *evt)
         {
             // betting time
 
-            pthread_mutex_lock(&(state.mutex));
+            pthread_mutex_lock(&(state.mut));
             if(state.phase==GAME)
             {
                 state.phase = BETTING;
-                pthread_mutex_unlock(&(state.mutex));
+                pthread_mutex_unlock(&(state.mut));
 
                 pthread_t num;
                 pthread_create(&num, NULL, handle_betting, NULL);
                 pthread_detach(num);
             }
-            pthread_mutex_unlock(&(state.mutex));
+            if(state.phase==BUFFER)
+            {
+                pthread_mutex_unlock(&(state.mut));
+                return;
+            }
+            pthread_mutex_unlock(&(state.mut));
 
             if(strstr(evt->message, "BLUE"))
             {
                 local_amount = fetch_amount(evt->message);
-                pthread_mutex_lock(&(state.mutex));
+                pthread_mutex_lock(&(state.mut));
                 state.blue += local_amount;
-                pthread_mutex_unlock(&(state.mutex));
+                pthread_mutex_unlock(&(state.mut));
                 return;
             }
             if(strstr(evt->message, "RED"))
             {
                 local_amount = fetch_amount(evt->message);
-                pthread_mutex_lock(&(state.mutex));
-                state.blue += local_amount;
-                pthread_mutex_unlock(&(state.mutex));
+                pthread_mutex_lock(&(state.mut));
+                state.red += local_amount;
+                pthread_mutex_unlock(&(state.mut));
                 return;
             }
             ERROR("what the fuck?");
@@ -194,6 +223,22 @@ void handle_message(twirc_state_t *_, twirc_event_t *evt)
 void* handle_betting(void* _)
 {
     LOG("Betting is opened!");
-    // todo
+
+    sleep(60*3-20);
+
+    pthread_mutex_lock(&state.mut);
+    char* msg = malloc(64);
+    ASSERT(msg!=NULL);
+    snprintf(msg, 64, "!%s %d", state.blue>state.red?"red":"blue", (int) state.balance/10);
+    twirc_cmd_privmsg(s, "#saltyteemo", msg);
+    state.phase = BUFFER;
+    pthread_mutex_unlock(&state.mut);
+    fprintf(LOGFILE, "BET %d\nBLUE: %d\tRED: %d", (int) state.balance/10, state.blue, state.red);
+    sleep(100);
+
+    pthread_mutex_lock(&state.mut);
+    state.phase = GAME;
+    pthread_mutex_unlock(&state.mut);
+
     return NULL;
 }

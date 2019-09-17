@@ -7,4 +7,4 @@ link_directories(${CMAKE_SOURCE_DIR})
 
 add_executable(SaltyBot main.c)
 
-target_link_libraries(SaltyBot twirc)
+target_link_libraries(SaltyBot twirc pthread)

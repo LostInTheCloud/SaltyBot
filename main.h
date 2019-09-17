@@ -27,11 +27,11 @@ void handle_join(twirc_state_t *s, twirc_event_t *evt);
 void handle_message(twirc_state_t *s, twirc_event_t *evt);
 void* handle_betting(void* _);
 
-typedef enum phase {BETTING, GAME} PHASE;
+typedef enum phase {BETTING, BUFFER, GAME} PHASE;
 
 typedef struct state
 {
-    pthread_mutex_t mutex;
+    pthread_mutex_t mut;
     PHASE phase;
     int balance;
     int blue;
