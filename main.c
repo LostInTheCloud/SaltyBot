@@ -71,27 +71,27 @@ void setup()
     LOG("login successful!");
 }
 
-void handle_everything(twirc_state_t *s, twirc_event_t *evt)
+void handle_everything(twirc_state_t *_, twirc_event_t *evt)
 {
     if(DEBUG)
         fprintf(LOGFILE, "> %s\n", evt->raw);
 }
 
-void handle_welcome(twirc_state_t *x, twirc_event_t *evt)
+void handle_welcome(twirc_state_t *_, twirc_event_t *evt)
 {
-    fprintf(LOGFILE, "> %s\n", evt->raw);
-
-    err = twirc_cmd_join(s, "#grafseegurke");
-    LOG("joining grafseegurke");
+    err = twirc_cmd_join(s, "#saltyteemo");
+    LOG("joining saltyteemo");
 }
 
-void handle_join(twirc_state_t *s, twirc_event_t *evt)
+void handle_join(twirc_state_t *_, twirc_event_t *evt)
 {
-    fprintf(LOGFILE, "> %s\n", evt->raw);
+    if(DEBUG)
+        fprintf(LOGFILE, "> %s\n", evt->raw);
 }
 
-void handle_message(twirc_state_t *s, twirc_event_t *evt)
+void handle_message(twirc_state_t *_, twirc_event_t *evt)
 {
-    fprintf(LOGFILE, "msg = %s\n", evt->message);
-    fprintf(LOGFILE, "author = %s\n", evt->origin);
+    if(strcmp(evt->origin, "xxsaltbotxx")!=0)
+        return;
+    fprintf(LOGFILE, "%s:  %s\n", evt->origin, evt->message);
 }
