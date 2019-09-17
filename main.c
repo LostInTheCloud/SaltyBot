@@ -73,7 +73,8 @@ void setup()
 
 void handle_everything(twirc_state_t *s, twirc_event_t *evt)
 {
-    fprintf(LOGFILE, "> %s\n", evt->raw);
+    if(DEBUG)
+        fprintf(LOGFILE, "> %s\n", evt->raw);
 }
 
 void handle_welcome(twirc_state_t *x, twirc_event_t *evt)
@@ -82,34 +83,15 @@ void handle_welcome(twirc_state_t *x, twirc_event_t *evt)
 
     err = twirc_cmd_join(s, "#grafseegurke");
     LOG("joining grafseegurke");
-    printf("%d\n", err);
 }
 
 void handle_join(twirc_state_t *s, twirc_event_t *evt)
 {
     fprintf(LOGFILE, "> %s\n", evt->raw);
-    // Check if 'origin' (the name of the user who triggered the event)
-    // was us and the channel is the one we are interested in
-    if (strcmp(evt->channel, "#grafseegurke") == 0 && strcmp(evt->origin, NICK) == 0)
-    {
-        twirc_cmd_privmsg(s, "#grafseegurke", "Hello world!");
-    }
 }
 
 void handle_message(twirc_state_t *s, twirc_event_t *evt)
 {
-    if(strcmp(evt->message, "!bwuah")==0)
-    {
-        sleep(1);
-        LOG("its a bwuah! sending bwuah");
-        err = twirc_cmd_privmsg(s, "#grafseegurke", "BWUAAAAH!");
-        LOGINT(err);
-    }
-    if(strcmp(evt->message, "!pog")==0)
-    {
-        sleep(1);
-        LOG("its a pog! sending grafsePog");
-        err = twirc_cmd_privmsg(s, "#grafseegurke", "grafsePog!");
-        LOGINT(err);
-    }
+    fprintf(LOGFILE, "msg = %s\n", evt->message);
+    fprintf(LOGFILE, "author = %s\n", evt->origin);
 }
