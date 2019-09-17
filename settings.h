@@ -1,8 +1,8 @@
 #define NICK "grafseebot"
 #define TOKEN "your oauth"
 
-#define BALANCE 9000
+#define BALANCE 8510
 
-#define TIME_TO_BET (3*60)
+#define TIME_TO_BET (3*60-15)
 
-#define DEBUG 0
+#define DEBUG 1

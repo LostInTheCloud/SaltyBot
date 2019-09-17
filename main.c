@@ -96,8 +96,7 @@ void setup()
 
 void handle_everything(twirc_state_t *_, twirc_event_t *evt)
 {
-    if(DEBUG)
-        fprintf(LOGFILE, "> %s\n", evt->raw);
+    // fprintf(LOGFILE, "> %s\n", evt->raw);
 }
 
 void handle_welcome(twirc_state_t *_, twirc_event_t *evt)
@@ -109,8 +108,7 @@ void handle_welcome(twirc_state_t *_, twirc_event_t *evt)
 
 void handle_join(twirc_state_t *_, twirc_event_t *evt)
 {
-    if(DEBUG)
-        fprintf(LOGFILE, "> %s\n", evt->raw);
+    // fprintf(LOGFILE, "> %s\n", evt->raw);
 }
 
 void handle_message(twirc_state_t *_, twirc_event_t *evt)
@@ -139,7 +137,8 @@ void handle_message(twirc_state_t *_, twirc_event_t *evt)
         if(strstr(evt->message, "You do not have enough"))
         {
             ERROR("You do not have enough");
-            // todo: ...
+            twirc_cmd_privmsg(s, "#saltyteemo", "!forage");
+            twirc_cmd_privmsg(s, "#saltyteemo", "!blue 100");
             return;
         }
         if(strstr(evt->message, "balance is"))
@@ -161,7 +160,8 @@ void handle_message(twirc_state_t *_, twirc_event_t *evt)
             state.balance = new_balance;
             pthread_mutex_unlock(&state.mut);
 
-            LOG("Placed bet successfully!");
+            if(DEBUG)
+                LOG("Placed bet successfully!");
             return;
         }
         if(DEBUG)
@@ -185,7 +185,7 @@ void handle_message(twirc_state_t *_, twirc_event_t *evt)
                 pthread_create(&num, NULL, handle_betting, NULL);
                 pthread_detach(num);
             }
-            if(state.phase==BUFFER)
+            if(!DEBUG && state.phase==BUFFER)
             {
                 pthread_mutex_unlock(&(state.mut));
                 return;
@@ -222,7 +222,8 @@ void handle_message(twirc_state_t *_, twirc_event_t *evt)
 
 void* handle_betting(void* _)
 {
-    LOG("Betting is opened!");
+    if(DEBUG)
+        LOG("Betting is opened!");
 
     sleep(TIME_TO_BET);
 
@@ -232,12 +233,15 @@ void* handle_betting(void* _)
     snprintf(msg, 64, "!%s %d", state.blue>state.red?"red":"blue", (int) state.balance/10);
     twirc_cmd_privmsg(s, "#saltyteemo", msg);
     state.phase = BUFFER;
+    if(DEBUG)
+        fprintf(LOGFILE, "BET %d\n %d:%d\n", (int) state.balance/10, state.blue, state.red);
     pthread_mutex_unlock(&state.mut);
-    fprintf(LOGFILE, "BET %d\nBLUE: %d\tRED: %d\n", (int) state.balance/10, state.blue, state.red);
+
     sleep(100);
 
     pthread_mutex_lock(&state.mut);
-    fprintf(LOGFILE, "final count: BLUE: %d\tRED: %d\n", state.blue, state.red);
+    if(DEBUG)
+        fprintf(LOGFILE, "final count:\t%d:%d\n", state.blue, state.red);
     state.phase = GAME;
     state.blue = 0;
     state.red = 0;
