@@ -18,9 +18,27 @@ int main()
     ASSERT(log);
 
     fprintf(log, "Starting up\n");
-    fflush(log);
 
+    setup();
+
+    fprintf(log, "Shutting down\n");
+    fflush(log);
     fclose(log);
 
     return 0;
+}
+
+void setup()
+{
+    twirc_state_t *s = twirc_init();
+
+    twirc_callbacks_t *cbs = twirc_get_callbacks(s);
+    cbs->welcome = handle_all;
+    cbs->privmsg = handle_all;
+
+}
+
+void handle_all(twirc_state_t *s, twirc_event_t *evt)
+{
+    fprintf(stdout, "> %s\n", evt->raw);
 }

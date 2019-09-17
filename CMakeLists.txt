@@ -3,6 +3,8 @@ project(SaltyBot C)
 
 set(CMAKE_C_STANDARD 99)
 
+link_directories(${CMAKE_SOURCE_DIR})
+
 add_executable(SaltyBot main.c main.h)
 
-add_library(SaltyBot libtwirc.so)
+target_link_libraries(SaltyBot twirc)
