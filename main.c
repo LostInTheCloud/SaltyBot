@@ -52,6 +52,12 @@ void start_logger()
 
 void setup()
 {
+    state.balance = 0;
+    state.phase = GAME;
+    state.blue = 0;
+    state.red = 0;
+    state.mutex = PTHREAD_MUTEX_INITIALIZER;
+
     s = twirc_init();
 
     twirc_callbacks_t *cbs = twirc_get_callbacks(s);
@@ -112,7 +118,7 @@ void handle_message(twirc_state_t *_, twirc_event_t *evt)
 
     if(strcmp(evt->origin, "xxsaltbotxx")!=0)
         return;
-    fprintf(LOGFILE, "%s:  %s\n", evt->origin, evt->message);
+    //fprintf(LOGFILE, "%s:  %s\n", evt->origin, evt->message);
     if(strstr(evt->message, NICK))
     {
         // targeted at @me
@@ -144,16 +150,33 @@ void handle_message(twirc_state_t *_, twirc_event_t *evt)
         if(strstr(evt->message, "Bet complete"))
         {
             // betting time
+
+            pthread_mutex_lock(&(state.mutex));
+            if(state.phase==GAME)
+            {
+                state.phase = BETTING;
+                pthread_mutex_unlock(&(state.mutex));
+
+                pthread_t num;
+                pthread_create(&num, NULL, handle_betting, NULL);
+                pthread_detach(num);
+            }
+            pthread_mutex_unlock(&(state.mutex));
+
             if(strstr(evt->message, "BLUE"))
             {
                 local_amount = fetch_amount(evt->message);
-                // todo
+                pthread_mutex_lock(&(state.mutex));
+                state.blue += local_amount;
+                pthread_mutex_unlock(&(state.mutex));
                 return;
             }
             if(strstr(evt->message, "RED"))
             {
                 local_amount = fetch_amount(evt->message);
-                // todo
+                pthread_mutex_lock(&(state.mutex));
+                state.blue += local_amount;
+                pthread_mutex_unlock(&(state.mutex));
                 return;
             }
             ERROR("what the fuck?");
@@ -166,4 +189,11 @@ void handle_message(twirc_state_t *_, twirc_event_t *evt)
             return;
         }
     }
+}
+
+void* handle_betting(void* _)
+{
+    LOG("Betting is opened!");
+    // todo
+    return NULL;
 }
