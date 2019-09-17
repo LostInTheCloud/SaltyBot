@@ -155,7 +155,7 @@ void handle_message(twirc_state_t *_, twirc_event_t *evt)
             else
             {
                 fprintf(LOGFILE, "Bet %s! %d shrooms\n",
-                        new_balance>state.balance?"WON":"LOST",
+                        (new_balance+state.balance/10)>state.balance?"WON":"LOST",
                         new_balance-state.balance);
             }
             state.balance = new_balance;
@@ -224,7 +224,7 @@ void* handle_betting(void* _)
 {
     LOG("Betting is opened!");
 
-    sleep(60*3-20);
+    sleep(TIME_TO_BET);
 
     pthread_mutex_lock(&state.mut);
     char* msg = malloc(64);
@@ -233,11 +233,14 @@ void* handle_betting(void* _)
     twirc_cmd_privmsg(s, "#saltyteemo", msg);
     state.phase = BUFFER;
     pthread_mutex_unlock(&state.mut);
-    fprintf(LOGFILE, "BET %d\nBLUE: %d\tRED: %d", (int) state.balance/10, state.blue, state.red);
+    fprintf(LOGFILE, "BET %d\nBLUE: %d\tRED: %d\n", (int) state.balance/10, state.blue, state.red);
     sleep(100);
 
     pthread_mutex_lock(&state.mut);
+    fprintf(LOGFILE, "final count: BLUE: %d\tRED: %d\n", state.blue, state.red);
     state.phase = GAME;
+    state.blue = 0;
+    state.red = 0;
     pthread_mutex_unlock(&state.mut);
 
     return NULL;
