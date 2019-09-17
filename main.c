@@ -36,6 +36,8 @@ void setup()
     cbs->welcome = handle_all;
     cbs->privmsg = handle_all;
 
+    twirc_connect("irc.chat.twitch.tv", "6667", NICK, TOKEN);
+
 }
 
 void handle_all(twirc_state_t *s, twirc_event_t *evt)
