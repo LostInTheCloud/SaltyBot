@@ -11,7 +11,7 @@
 
 #include "settings.h"
 
-#define ERROR(expr2) fprintf(stderr, "ERROR in function \"%s\" in %s:%d%s%s\n", __func__, __FILE__, __LINE__, (expr2)?"\n> ":"", (expr2)?(expr2):"");
+#define ERROR(expr2) fprintf(LOGFILE, "ERROR in function \"%s\" in %s:%d%s%s\n", __func__, __FILE__, __LINE__, (expr2)?"\n> ":"", (expr2)?(expr2):"");
 #define ASSERT(expr) if(!(expr)){ERROR(NULL); exit(0);}
 #define LOG(expr) fprintf(LOGFILE, "%s\n", ((expr)));
 #define LOGINT(expr) fprintf(LOGFILE, "%ld\n", ((expr)));

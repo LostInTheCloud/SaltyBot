@@ -81,6 +81,7 @@ void handle_welcome(twirc_state_t *_, twirc_event_t *evt)
 {
     err = twirc_cmd_join(s, "#saltyteemo");
     LOG("joining saltyteemo");
+    LOGINT(err);
 }
 
 void handle_join(twirc_state_t *_, twirc_event_t *evt)
@@ -94,4 +95,54 @@ void handle_message(twirc_state_t *_, twirc_event_t *evt)
     if(strcmp(evt->origin, "xxsaltbotxx")!=0)
         return;
     fprintf(LOGFILE, "%s:  %s\n", evt->origin, evt->message);
+    if(strstr(evt->message, NICK))
+    {
+        // targeted at @me
+
+        if(strstr(evt->message, "Betting has not opened yet."))
+        {
+            ERROR("Betting has not opened yet");
+            // todo: ...
+            return;
+        }
+        if(strstr(evt->message, "BETTING HAS CLOSED?!?"))
+        {
+            ERROR("hfjdsf");
+            // todo: ...
+            return;
+        }
+        if(strstr(evt->message, "balance is"))
+        {
+            LOG("Placed bet successfully!");
+            // todo: ...
+            return;
+        }
+    }
+    else
+    {
+        // @others
+
+        if(strstr(evt->message, "Bet complete"))
+        {
+            // betting time
+            if(strstr(evt->message, "BLUE"))
+            {
+                //todo: ...
+                return;
+            }
+            if(strstr(evt->message, "RED"))
+            {
+                //todo: ...
+                return;
+            }
+            ERROR("what the fuck?");
+            exit(0);
+        }
+        else
+        {
+            // disregard
+            // todo: actually, lets check for time of closed bets
+            return;
+        }
+    }
 }
