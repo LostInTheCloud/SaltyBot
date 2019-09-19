@@ -18,16 +18,24 @@
 #define LOGINT(expr) fprintf(LOGFILE, "%ld\n", ((expr)));
 
 int fetch_amount(char* msg);
+
 int fetch_balance(char* msg);
+
 void start_logger();
+
 void setup();
-void handle_everything(twirc_state_t *s, twirc_event_t *evt);
-void handle_welcome(twirc_state_t *s, twirc_event_t *evt);
-void handle_join(twirc_state_t *s, twirc_event_t *evt);
-void handle_message(twirc_state_t *s, twirc_event_t *evt);
+
+void handle_everything(twirc_state_t* s, twirc_event_t* evt);
+
+void handle_welcome(twirc_state_t* s, twirc_event_t* evt);
+
+void handle_join(twirc_state_t* s, twirc_event_t* evt);
+
+void handle_message(twirc_state_t* s, twirc_event_t* evt);
+
 void* handle_betting(void* _);
 
-typedef enum phase {BETTING, BUFFER, GAME} PHASE;
+typedef enum phase{BETTING, BUFFER, GAME} PHASE;
 
 typedef struct state
 {
@@ -36,7 +44,7 @@ typedef struct state
     int balance;
     int blue;
     int red;
-}STATE;
+} STATE;
 
 STATE state;
 

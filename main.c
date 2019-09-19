@@ -29,7 +29,7 @@ int fetch_amount(char* msg)
 int fetch_balance(char* msg)
 {
     int amount;
-    err = sscanf(msg,"%*[^.]%*[^0123456789]%d", &amount);
+    err = sscanf(msg, "%*[^.]%*[^0123456789]%d", &amount);
     ASSERT(err == 1);
     return amount;
 }
@@ -37,11 +37,11 @@ int fetch_balance(char* msg)
 void start_logger()
 {
     char* logpath;
-    logpath = malloc(7+8+1+3+1);
+    logpath = malloc(7 + 8 + 1 + 3 + 1);
     ASSERT(logpath);
 
-    err = snprintf(logpath, 7+8+1+3+1, "./logs/%lx.log", time(NULL));
-    ASSERT(err==7+8+1+3);
+    err = snprintf(logpath, 7 + 8 + 1 + 3 + 1, "./logs/%lx.log", time(NULL));
+    ASSERT(err == 7 + 8 + 1 + 3);
     struct stat st = {0};
     if(stat("./logs", &st) == -1)
         mkdir("./logs", 0777);
@@ -61,61 +61,61 @@ void setup()
 
     s = twirc_init();
 
-    twirc_callbacks_t *cbs = twirc_get_callbacks(s);
+    twirc_callbacks_t* cbs = twirc_get_callbacks(s);
 
 //    cbs->connect         = handle_everything;
-    cbs->welcome         = handle_welcome;
+    cbs->welcome = handle_welcome;
     cbs->globaluserstate = handle_everything;
-    cbs->capack          = handle_everything;
-    cbs->ping            = handle_everything;
-    cbs->join            = handle_join;
-    cbs->part            = handle_everything;
-    cbs->mode            = handle_everything;
-    cbs->names           = handle_everything;
-    cbs->privmsg         = handle_message;
-    cbs->whisper         = handle_everything;
-    cbs->action          = handle_everything;
-    cbs->notice          = handle_everything;
-    cbs->roomstate       = handle_everything;
-    cbs->usernotice      = handle_everything;
-    cbs->userstate       = handle_everything;
-    cbs->clearchat       = handle_everything;
-    cbs->clearmsg        = handle_everything;
-    cbs->hosttarget      = handle_everything;
-    cbs->reconnect       = handle_everything;
-    cbs->invalidcmd      = handle_everything;
-    cbs->other           = handle_everything;
+    cbs->capack = handle_everything;
+    cbs->ping = handle_everything;
+    cbs->join = handle_join;
+    cbs->part = handle_everything;
+    cbs->mode = handle_everything;
+    cbs->names = handle_everything;
+    cbs->privmsg = handle_message;
+    cbs->whisper = handle_everything;
+    cbs->action = handle_everything;
+    cbs->notice = handle_everything;
+    cbs->roomstate = handle_everything;
+    cbs->usernotice = handle_everything;
+    cbs->userstate = handle_everything;
+    cbs->clearchat = handle_everything;
+    cbs->clearmsg = handle_everything;
+    cbs->hosttarget = handle_everything;
+    cbs->reconnect = handle_everything;
+    cbs->invalidcmd = handle_everything;
+    cbs->other = handle_everything;
 //    cbs->disconnect      = handle_everything;
-    cbs->outbound        = handle_everything;
+    cbs->outbound = handle_everything;
 
     err = twirc_connect(s, "irc.chat.twitch.tv", "6667", NICK, TOKEN);
     LOG("logging into twitch.tv");
-    ASSERT(err==0)
+    ASSERT(err == 0)
     LOG("login successful!");
 }
 
-void handle_everything(twirc_state_t *_, twirc_event_t *evt)
+void handle_everything(twirc_state_t* _, twirc_event_t* evt)
 {
     // fprintf(LOGFILE, "> %s\n", evt->raw);
 }
 
-void handle_welcome(twirc_state_t *_, twirc_event_t *evt)
+void handle_welcome(twirc_state_t* _, twirc_event_t* evt)
 {
     err = twirc_cmd_join(s, "#saltyteemo");
     LOG("joining saltyteemo");
     //todo: find out what ints shall be returned and check
 }
 
-void handle_join(twirc_state_t *_, twirc_event_t *evt)
+void handle_join(twirc_state_t* _, twirc_event_t* evt)
 {
     // fprintf(LOGFILE, "> %s\n", evt->raw);
 }
 
-void handle_message(twirc_state_t *_, twirc_event_t *evt)
+void handle_message(twirc_state_t* _, twirc_event_t* evt)
 {
     int local_amount;
 
-    if(strcmp(evt->origin, "xxsaltbotxx")!=0)
+    if(strcmp(evt->origin, "xxsaltbotxx") != 0)
         return;
 
     if(strstr(evt->message, NICK))
@@ -145,18 +145,18 @@ void handle_message(twirc_state_t *_, twirc_event_t *evt)
         {
             // todo: ...
             int new_balance = fetch_balance(evt->message);
-            new_balance += (int)(state.balance/10);
+            new_balance += (int) (state.balance / 10);
 
             pthread_mutex_lock(&state.mut);
-            if(new_balance==state.balance)
+            if(new_balance == state.balance)
             {
                 LOG("match remade - refunded");
             }
             else
             {
                 fprintf(LOGFILE, "Bet %s! %d shrooms\n",
-                        new_balance>state.balance?"WON":"LOST",
-                        new_balance-state.balance);
+                        new_balance > state.balance ? "WON" : "LOST",
+                        new_balance - state.balance);
             }
             state.balance = new_balance;
             pthread_mutex_unlock(&state.mut);
@@ -166,7 +166,7 @@ void handle_message(twirc_state_t *_, twirc_event_t *evt)
             return;
         }
         if(DEBUG)
-            fprintf(LOGFILE,"MSG: %s\n", evt->message);
+            fprintf(LOGFILE, "MSG: %s\n", evt->message);
     }
     else
     {
@@ -177,7 +177,7 @@ void handle_message(twirc_state_t *_, twirc_event_t *evt)
             // betting time
 
             pthread_mutex_lock(&(state.mut));
-            if(state.phase==GAME)
+            if(state.phase == GAME)
             {
                 state.phase = BETTING;
                 pthread_mutex_unlock(&(state.mut));
@@ -186,7 +186,7 @@ void handle_message(twirc_state_t *_, twirc_event_t *evt)
                 pthread_create(&num, NULL, handle_betting, NULL);
                 pthread_detach(num);
             }
-            if(!DEBUG && state.phase==BUFFER)
+            if(!DEBUG && state.phase == BUFFER)
             {
                 pthread_mutex_unlock(&(state.mut));
                 return;
@@ -230,12 +230,12 @@ void* handle_betting(void* _)
 
     pthread_mutex_lock(&state.mut);
     char* msg = malloc(64);
-    ASSERT(msg!=NULL);
-    snprintf(msg, 64, "!%s %d", state.blue>state.red?"red":"blue", (int) state.balance/10);
+    ASSERT(msg != NULL);
+    snprintf(msg, 64, "!%s %d", state.blue > state.red ? "red" : "blue", (int) state.balance / 10);
     twirc_cmd_privmsg(s, "#saltyteemo", msg);
     state.phase = BUFFER;
     if(DEBUG)
-        fprintf(LOGFILE, "BET %d\n %d:%d\n", (int) state.balance/10, state.blue, state.red);
+        fprintf(LOGFILE, "BET %d\n %d:%d\n", (int) state.balance / 10, state.blue, state.red);
     pthread_mutex_unlock(&state.mut);
 
     sleep(100);
