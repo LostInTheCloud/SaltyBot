@@ -2,10 +2,12 @@
 
 int main()
 {
-    LOGFILE = stdout; /*
+    LOGFILE = stdout;
     start_logger(); //*/
 
     fprintf(LOGFILE, "Starting up\n");
+    fprintf(LOGFILE, "Balance=%d\nTimeToBet=%d\nQuotient=%d\nNick=%s\nPlaystyle=%s\n", BALANCE, TIME_TO_BET, QUOTIENT, NICK, 1 PLAYSTYLE 0 ?"Spicy":"Salty");
+    FLUSH
 
     setup();
 
@@ -36,7 +38,8 @@ int fetch_balance(char* msg)
 
 void start_logger()
 {
-    char* logpath;
+    /*
+     char* logpath;
     logpath = malloc(7 + 8 + 1 + 3 + 1);
     ASSERT(logpath);
 
@@ -45,8 +48,8 @@ void start_logger()
     struct stat st = {0};
     if(stat("./logs", &st) == -1)
         mkdir("./logs", 0777);
-
-    LOGFILE = fopen(logpath, "w");
+    //*/
+    LOGFILE = fopen("log.log", "w");
     ASSERT(LOGFILE);
 }
 
@@ -114,6 +117,12 @@ void handle_join(twirc_state_t* _, twirc_event_t* evt)
 void handle_message(twirc_state_t* _, twirc_event_t* evt)
 {
     int local_amount;
+
+    if(strcmp(evt->message, "!squid") == 0)
+    {
+        twirc_cmd_privmsg(s, "#saltyteemo", "Squid1 Squid2 Squid3 Squid4 ");
+        return;
+    }
 
     if(strcmp(evt->origin, "xxsaltbotxx") != 0)
         return;
@@ -231,11 +240,11 @@ void* handle_betting(void* _)
     pthread_mutex_lock(&state.mut);
     char* msg = malloc(64);
     ASSERT(msg != NULL);
-    snprintf(msg, 64, "!%s %d", state.blue > state.red ? "red" : "blue", (int) state.balance / 10);
+    snprintf(msg, 64, "!%s %d", state.blue PLAYSTYLE state.red ? "red" : "blue", (int) state.balance * QUOTIENT);
     twirc_cmd_privmsg(s, "#saltyteemo", msg);
     state.phase = BUFFER;
     if(DEBUG)
-        fprintf(LOGFILE, "BET %d\n %d:%d\n", (int) state.balance / 10, state.blue, state.red);
+        fprintf(LOGFILE, "BET %d\n %d:%d\n", (int) state.balance * QUOTIENT, state.blue, state.red);
     pthread_mutex_unlock(&state.mut);
 
     sleep(100);

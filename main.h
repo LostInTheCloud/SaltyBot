@@ -12,10 +12,11 @@
 
 #include "settings.h"
 
-#define ERROR(expr2) fprintf(LOGFILE, "ERROR in function \"%s\" in %s:%d%s%s\n", __func__, __FILE__, __LINE__, (expr2)?"\n> ":"", (expr2)?(expr2):"");
+#define FLUSH fflush(LOGFILE);fsync(fileno(LOGFILE));
+#define ERROR(expr2) fprintf(LOGFILE, "ERROR in function \"%s\" in %s:%d%s%s\n", __func__, __FILE__, __LINE__, (expr2)?"\n> ":"", (expr2)?(expr2):"");FLUSH
 #define ASSERT(expr) if(!(expr)){ERROR(NULL); exit(0);}
-#define LOG(expr) fprintf(LOGFILE, "%s\n", ((expr)));
-#define LOGINT(expr) fprintf(LOGFILE, "%ld\n", ((expr)));
+#define LOG(expr) fprintf(LOGFILE, "%s\n", ((expr)));FLUSH
+#define LOGINT(expr) fprintf(LOGFILE, "%ld\n", ((expr)));FLUSH
 
 int fetch_amount(char* msg);
 
